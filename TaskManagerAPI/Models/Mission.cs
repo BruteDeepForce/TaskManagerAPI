@@ -2,7 +2,7 @@
 
 namespace TaskManagerAPI.Models
 {
-    public class Task
+    public class Mission
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -14,6 +14,7 @@ namespace TaskManagerAPI.Models
         [ForeignKey("Project")]
         public int ProjectId {  get; set; }
 
-        public Project? Project { get; set; }
+        [ForeignKey("Employee")]
+        public int EmployeeId { get; set; }
     }
 }

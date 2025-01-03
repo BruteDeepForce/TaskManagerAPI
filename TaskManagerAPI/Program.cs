@@ -3,7 +3,10 @@ using TaskManagerAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 using System;
+using TaskManagerAPI.ServiceDependencies;
+using TaskManagerAPI.EntityRepositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,13 +48,28 @@ builder.Services.AddAuthentication(options =>
 
             return System.Threading.Tasks.Task.CompletedTask;
         }
-    };
+    };   //log JWT
 });
 //builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // Sadece admin kullanýcýlarý için politika
+    options.AddPolicy("admin", policy => policy.RequireClaim("Role", "admin"));
 
+    // Admin veya SecondClass kullanýcýlarý için politika
+    options.AddPolicy("AdminOrSecondClass", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "Role" && (c.Value == "admin" || c.Value == "secondclass"))
+        ));
+
+    // Sadece thirdclass kullanýcýlarý için politika
+    options.AddPolicy("thirdclass", policy => policy.RequireClaim("Role", "thirdclass"));
+});
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddServiceDependencies();   //DI Container'a ekledim
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TaskManagerDatabase")));

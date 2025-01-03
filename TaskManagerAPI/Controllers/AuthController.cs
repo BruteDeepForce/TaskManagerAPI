@@ -24,8 +24,8 @@ namespace TaskManagerAPI.Controllers
         public IActionResult Login([FromBody] LoginModel login)
         {
 
-            var userMail = _appDbContext.Users.FirstOrDefault(x => x.Email == login.Email);
-            var userPass = _appDbContext.Users.FirstOrDefault(y => y.Password == login.Password);
+            var userMail = _appDbContext.Employees.FirstOrDefault(x => x.Email == login.Email);
+            var userPass = _appDbContext.Employees.FirstOrDefault(y => y.Password == login.Password);
 
             if (userMail == null || userPass == null)
             {
@@ -42,10 +42,14 @@ namespace TaskManagerAPI.Controllers
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
 
+            var user = _appDbContext.Employees.FirstOrDefault(x => x.Email == email);
+            var userRole = user?.Role;   //Role bilgisini alıyoruz
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("Role", userRole)  //Claimden Role bilgisini ekliyoruz
+
             };
 
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
