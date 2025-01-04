@@ -10,5 +10,7 @@ namespace TaskManagerAPI.EntityRepositories
         public void Add(Tentity entity);  
 
         public void Update(Tentity entity);
+
+        public void Delete(Tentity entity);
     }
 }

@@ -6,9 +6,7 @@ namespace TaskManagerAPI.EntityRepositories
     public class EntityRepositoryBase<TEntity> : IEntityRepository<TEntity>
 
         where TEntity : class
-
     {
-
         private readonly AppDbContext _context;
 
         public EntityRepositoryBase(AppDbContext context)

@@ -14,7 +14,6 @@ namespace TaskManagerAPI.Register_Model
             _context = context;
             _employeeRepository = employeeRepository;
         }
-
         public bool RegisterOp(Employee employee)
         {
             var singleEmployee = _context.Employees.FirstOrDefault(x => x.Email == employee.Email);

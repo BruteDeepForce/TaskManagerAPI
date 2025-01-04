@@ -32,10 +32,9 @@ namespace TaskManagerAPI.Controllers
             _redisProcess = redisProcess;
         }
         [HttpGet("getMissionDescription")]
-        [Authorize(Policy = "admin")]
-        public async Task<IActionResult> GetMissionDescription(int id)
+        [Authorize(Policy = "admin")]       //Görev açıklaması getirme
+        public async Task<IActionResult> GetMissionDescription(int id)    
         {
-
             var mission = await _redisProcess.GetMissionDescribe(id);
 
             if (mission == null)
@@ -45,9 +44,8 @@ namespace TaskManagerAPI.Controllers
 
             return Ok(mission);
         }
-
         [HttpGet("GetMissionForEmployee")]
-        public IActionResult GetUser(int id)
+        public IActionResult GetUser(int id)   //Kullanıcıya göre görev getirme
         {
 
             var singleUser = _context.Missions.FirstOrDefault(x => x.EmployeeId == id);
@@ -58,31 +56,33 @@ namespace TaskManagerAPI.Controllers
                 IsCompleted = singleUser.IsCompleted
             });
         }
-        [HttpGet("GetMissions")]
+        [HttpGet("GetMissions")]   //Tüm görevleri getirme
         public async Task<IActionResult> GetMissions()
         {
             var missions = await _redisProcess.GetMissionsFromRedisProcess();
 
             return Ok(missions);
         } 
-
-
         [HttpPost("AddMission")]
-        [Authorize(Policy = "admin")]
+        [Authorize(Policy = "admin")]   //Görev ekleme
         public IActionResult AddMission([FromBody] Mission mission)
         {
             _missionEntityRepository.Add(mission);
             return Ok();
         }
-
         [HttpPost("UpdateMission")]
-        [Authorize(Policy = "AdminOrSecondClass")]
+        [Authorize(Policy = "AdminOrSecondClass")]    //Görev güncelleme
         public IActionResult UpdateTask([FromBody] Mission mission)
         {
             _missionEntityRepository.Update(mission);
             return Ok();
         }
-
-
+        [HttpPost("DeleteMission")]
+        public IActionResult DeleteMission(int id)   //Görev silme
+        {
+            var mission = _context.Missions.FirstOrDefault(x => x.Id == id);
+            _missionEntityRepository.Delete(mission);
+            return Ok();
+        }
     }
 }
