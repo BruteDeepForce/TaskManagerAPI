@@ -1,6 +1,7 @@
 ﻿using TaskManagerAPI.EntityRepositories;
 using TaskManagerAPI.RedisIntegration;
 using TaskManagerAPI.RedisModel;
+using TaskManagerAPI.Register_Model;
 
 namespace TaskManagerAPI.ServiceDependencies
 {
@@ -11,6 +12,7 @@ namespace TaskManagerAPI.ServiceDependencies
             services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepositoryBase<>));   //EntityRepositoryBase'ı kullanabilmek için ekledim
             services.AddSingleton<IRedisCacheService, RedisCacheService>();   //redis servisini ekledim
             services.AddScoped<IRedisProcess, RedisProcess>();   //Redis içi işlemler servisi
+            services.AddScoped<IRegisterService, Register>();   //Register servisi
             return services;
         }
     }
