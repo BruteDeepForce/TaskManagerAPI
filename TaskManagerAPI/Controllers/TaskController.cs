@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.EntityRepositories;
 using TaskManagerAPI.Models;
+using TaskManagerAPI.RedisIntegration;
+using TaskManagerAPI.RedisModel;
 
 
 namespace TaskManagerAPI.Controllers
@@ -16,35 +19,37 @@ namespace TaskManagerAPI.Controllers
         private readonly IEntityRepository<Employee> _employeeEntityRepository;
         private readonly IEntityRepository<Mission> _missionEntityRepository;
         private readonly IEntityRepository<Project> _projectEntityRepository;
+        private readonly IRedisCacheService _redisCacheService;
+        private readonly IRedisProcess _redisProcess;
 
-        public TaskController(AppDbContext context, IEntityRepository<Employee> EmployeeEntityRepository, IEntityRepository<Mission> missionEntityRepository, IEntityRepository<Project> projectEntityRepository)
+        public TaskController(AppDbContext context, IEntityRepository<Employee> EmployeeEntityRepository, IEntityRepository<Mission> missionEntityRepository, IEntityRepository<Project> projectEntityRepository, IRedisCacheService redisCacheService, IRedisProcess redisProcess)
         {
             _context = context;
             _projectEntityRepository = projectEntityRepository;
             _missionEntityRepository = missionEntityRepository;
             _employeeEntityRepository = EmployeeEntityRepository;
+            _redisCacheService = redisCacheService;
+            _redisProcess = redisProcess;
         }
         [HttpGet("getMissionDescription")]
         [Authorize(Policy = "admin")]
-        public IActionResult GetTasksTitle(int id)
+        public async Task<IActionResult> GetMissionDescription(int id)
         {
 
-            var tasks = _context.Missions.ToList();
+            var mission = await _redisProcess.GetMissionDescribe(id);
 
-            var taskControl = tasks.FirstOrDefault(x => x.Id == id);
-
-            if (taskControl == null)
+            if (mission == null)
             {
                 return BadRequest();
             }
-            var Tasktitles = taskControl.Description;
 
-            return Ok(Tasktitles);
+            return Ok(mission);
         }
 
         [HttpGet("GetMissionForEmployee")]
         public IActionResult GetUser(int id)
         {
+
             var singleUser = _context.Missions.FirstOrDefault(x => x.EmployeeId == id);
 
             return Ok(new Mission()
@@ -53,7 +58,14 @@ namespace TaskManagerAPI.Controllers
                 IsCompleted = singleUser.IsCompleted
             });
         }
-        
+        [HttpGet("GetMissions")]
+        public async Task<IActionResult> GetMissions()
+        {
+            var missions = await _redisProcess.GetMissionsFromRedisProcess();
+
+            return Ok(missions);
+        } 
+
 
         [HttpPost("AddMission")]
         [Authorize(Policy = "admin")]

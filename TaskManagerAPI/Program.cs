@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System;
 using TaskManagerAPI.ServiceDependencies;
 using TaskManagerAPI.EntityRepositories;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +74,12 @@ builder.Services.AddServiceDependencies();   //DI Container'a ekledim
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TaskManagerDatabase")));
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>    //Redis için DI Container'a baðlantýyý ekledim
+{
+    var configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    return ConnectionMultiplexer.Connect(configuration);
+});
 
 builder.Services.AddSwaggerGen();
 
