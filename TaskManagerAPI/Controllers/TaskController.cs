@@ -21,7 +21,6 @@ namespace TaskManagerAPI.Controllers
         private readonly IEntityRepository<Project> _projectEntityRepository;
         private readonly IRedisCacheService _redisCacheService;
         private readonly IRedisProcess _redisProcess;
-
         public TaskController(AppDbContext context, IEntityRepository<Employee> EmployeeEntityRepository, IEntityRepository<Mission> missionEntityRepository, IEntityRepository<Project> projectEntityRepository, IRedisCacheService redisCacheService, IRedisProcess redisProcess)
         {
             _context = context;
@@ -72,9 +71,13 @@ namespace TaskManagerAPI.Controllers
         }
         [HttpPost("UpdateMission")]
         [Authorize(Policy = "AdminOrSecondClass")]    //Görev güncelleme
+        [Yetki("Edit")]  //
         public IActionResult UpdateTask([FromBody] Mission mission)
         {
+
             _missionEntityRepository.Update(mission);
+            // log girilecek servisi çağır
+            _context.SaveChanges();
             return Ok();
         }
         [HttpPost("DeleteMission")]

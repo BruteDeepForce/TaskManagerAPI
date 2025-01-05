@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskManagerAPI.AdminNotify_Model;
 using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.EntityRepositories
@@ -8,10 +9,12 @@ namespace TaskManagerAPI.EntityRepositories
         where TEntity : class
     {
         private readonly AppDbContext _context;
+        private readonly IAdminNotifyService _adminNotifyService;
 
-        public EntityRepositoryBase(AppDbContext context)
+        public EntityRepositoryBase(AppDbContext context, IAdminNotifyService adminNotifyService)
         {
             _context = context;
+            _adminNotifyService = adminNotifyService;
         }
         public void Add(TEntity entity)
         {
@@ -23,9 +26,14 @@ namespace TaskManagerAPI.EntityRepositories
         }
         public void Update(TEntity entity)
         {
-
             _context.Set<TEntity>().Update(entity);
-            _context.SaveChanges();
+
+
+            if (entity is Mission mission)
+            {
+                _adminNotifyService.NotifyAdmin(mission);
+            }
+
 
         }
         public void Delete(TEntity entity)
